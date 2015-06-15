@@ -29,6 +29,10 @@ typedef char** board_t;
 
 void print_board(char board[BOARD_SIZE][BOARD_SIZE]);
 void init_board(char board[BOARD_SIZE][BOARD_SIZE]);
+void clear_board(char board[BOARD_SIZE][BOARD_SIZE]);
+char* input2str(FILE* pFile);
+void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]);
+
 
 typedef enum { WHITE = 0, BLACK = 1 } COLOR;
 
@@ -46,4 +50,7 @@ typedef struct move{
 	struct move* next;
 } Move;
 
-#endif  
+
+extern COLOR user_color;
+extern int minimax_depth;
+#endif
