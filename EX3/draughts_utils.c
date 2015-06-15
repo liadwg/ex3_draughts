@@ -177,6 +177,7 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 		else get_man_moves(board, player, p);
 			}
 	return moves_head;
+	// need to handle man becoming kings
 }
 
 void print_moves(Move* head){
