@@ -3,22 +3,22 @@
 COLOR user_color = WHITE;
 int minimax_depth = 0;
 
-//int main()
-//{
-//	char board[BOARD_SIZE][BOARD_SIZE];
-//	init_board(board);
-//	board[3][3] = WHITE_K;
-//	//board[2][4] = BLACK_M;
-//	//board[4][4] = BLACK_M;
-//	//board[5][7] = EMPTY;
-//	print_board(board);
-//	print_message(WRONG_MINIMAX_DEPTH);
-//	perror_message("TEST");
-//	Move* m = get_all_moves(board, WHITE);
-//	print_moves(m);
-//	scanf_s("DONE");
-//	return 0;
-//}
+int main()
+{
+	char board[BOARD_SIZE][BOARD_SIZE];
+	init_board(board);
+	board[3][3] = WHITE_K;
+	//board[2][4] = BLACK_M;
+	//board[4][4] = BLACK_M;
+	//board[5][7] = EMPTY;
+	print_board(board);
+	print_message(WRONG_MINIMAX_DEPTH);
+	perror_message("TEST");
+	Move* m = get_all_moves(board, WHITE);
+	print_moves(m);
+	scanf_s("DONE");
+	return 0;
+}
 
 void print_line(){
 	int i;
@@ -154,21 +154,21 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 }
 
 
-int main(void)
-{
-	printf(ENTER_SETTINGS);
-	printf("> ");
-	char *command = input2str(stdin);
-
-	while (strcmp(command, "quit") != 0 && strcmp(command, "start") != 0){
-		exc(command);
-		free(command);
-		printf("> ");
-		command = input2str(stdin);
-	}
-	if (strcmp(command, "start") == 0)
-		free(command);
-	//***move to game state***
-	free(command);
-	return 0;
-}
+//int main(void)
+//{
+//	printf(ENTER_SETTINGS);
+//	printf("> ");
+//	char *command = input2str(stdin);
+//
+//	while (strcmp(command, "quit") != 0 && strcmp(command, "start") != 0){
+//		exc(command);
+//		free(command);
+//		printf("> ");
+//		command = input2str(stdin);
+//	}
+//	if (strcmp(command, "start") == 0)
+//		free(command);
+//	//***move to game state***
+//	free(command);
+//	return 0;
+//}

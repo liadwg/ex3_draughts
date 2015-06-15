@@ -24,7 +24,6 @@ void * safe_realloc(void *old_pointer, size_t size){
 #define realloc(x, y) safe_realloc((x), (y));
 
 int is_valid_pos(Pos pos){
-	//return (pos.col > 96 && pos.col <= 96 + BOARD_SIZE && pos.row > 0 && pos.row <= BOARD_SIZE);
 	return (pos.col >= 0 && pos.col < BOARD_SIZE && pos.row >= 0 && pos.row < BOARD_SIZE);
 }
 
@@ -49,17 +48,17 @@ void clear_old_moves(Move* head){
 	}
 }
 
-void add_move(Pos piece, Pos* dests, int dests_num){
+void add_move(Pos piece, Pos* dests, int move_captures){
 	if (moves == NULL){
 		moves = malloc(sizeof(Move));
 		moves_head = moves;
 	}
-	else if (moves->captures < dests_num  && abs(piece.row - dests->row) != 1){
+	else if (moves->captures < move_captures  && abs(piece.row - dests->row) != 1){
 		clear_old_moves(moves_head);
 		moves = malloc(sizeof(Move));
 		moves_head = moves;
 	}
-	else if ((moves->captures == 0 && abs(piece.row - dests->row) == 1) || (moves->captures == dests_num && abs(piece.row - dests->row) != 1)){
+	else if ((moves->captures == 0 && abs(piece.row - dests->row) == 1) || (moves->captures == move_captures && abs(piece.row - dests->row) != 1)){
 		moves->next = malloc(sizeof(Move));
 		moves = moves->next;
 	}
@@ -67,14 +66,20 @@ void add_move(Pos piece, Pos* dests, int dests_num){
 
 	moves->piece.col = piece.col;
 	moves->piece.row = piece.row;
-	moves->dest = malloc(sizeof(Pos) * dests_num);
-	for (int i = 0; i < dests_num; i++){
-		moves->dest[i].row = dests[i].row;
-		moves->dest[i].col = dests[i].col;
+	if (move_captures == 0){
+		moves->dest = malloc(sizeof(Pos));
+		moves->dest->row = dests->row;
+		moves->dest->col = dests->col;
+	}
+	else{
+		moves->dest = malloc(sizeof(Pos) * move_captures);
+		for (int i = 0; i < move_captures; i++){
+			moves->dest[i].row = dests[i].row;
+			moves->dest[i].col = dests[i].col;
+		}
 	}
 
-	if (abs(piece.row - dests->row) == 1) moves->captures = 0;
-	else moves->captures = dests_num;
+	moves->captures = move_captures;
 	moves->next = NULL;
 }
 
@@ -123,7 +128,7 @@ void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	if (player == BLACK) direction = -1;
 
 	for (int p = 0; p < 4; p++){
-		if (is_valid_pos(pos[p]) && pos[p].row == piece.row + direction && board[pos[p].col][pos[p].row] == EMPTY) add_move(piece, &pos[p], 1);
+		if (is_valid_pos(pos[p]) && pos[p].row == piece.row + direction && board[pos[p].col][pos[p].row] == EMPTY) add_move(piece, &pos[p], 0);
 		else if (is_valid_pos(pos[p]) && is_opposite(player, board[pos[p].col][pos[p].row])){
 			char tmp = board[pos[p].row][pos[p].col];
 			board[pos[p].row][pos[p].col] = EMPTY;
@@ -148,9 +153,8 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 	for (int p = 0; p < 4; p++){
 		curr = pos[p];
 		while (is_valid_pos(curr) && board[curr.col][curr.row] == EMPTY){
-			add_move(piece, &curr, 1);
+			add_move(piece, &curr, 0);
 			curr = get_next_diag(piece, curr);
-			// BUG - once dests_num == 1 and |dest-start| != 1 add_moves thinks its 1 capture and not a simple move..
 		}
 		if (is_valid_pos(curr) && is_opposite(player, board[curr.col][curr.row])){
 			char tmp = board[curr.row][curr.col];
@@ -177,7 +181,6 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 		else get_man_moves(board, player, p);
 			}
 	return moves_head;
-	//hgfjhgfjhgfjgfjgfjhgf
 }
 
 void print_moves(Move* head){
