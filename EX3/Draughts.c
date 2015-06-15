@@ -118,50 +118,52 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 		int x = atoi(strtok(NULL, " "));
 		if (x > 6 || x < 1) printf(WRONG_MINIMAX_DEPTH);
 		else minimax_depth = x;
+		//printf(minimax_depth);
 	}
 	if (strcmp(word1, "user_color") == 0){
 		char * color = strtok(NULL, " ");
 		if (strcmp(word1, "black") == 0) user_color = BLACK;
-		free(color);
 	}
 	if (strcmp(word1, "clear") == 0) clear_board(board);
 	if (strcmp(word1, "rm") == 0){
-		char * coor = strtok(NULL, " ,<>");
-		if (coor[0] < 'a' || coor[0] > 'j' || (coor[1] - '0') < 1 || (coor[1] - '0') > 10) printf(WRONG_POSITION);
-		else board[coor[0] - 'a'][coor[1] - '0'] = EMPTY;
-		free(coor);
+		char * coor = strtok(NULL, " <>");
+		if (coor[0] < 'a' || coor[0] > 'j' || coor[2] < '1' || (coor[2] - '0') > 10) printf(WRONG_POSITION);
+		else board[coor[0] - 'a'][coor[2]-'1'] = EMPTY;
 	}
 	if (strcmp(word1, "set") == 0){
-		char * coor = strtok(NULL, " ,<>");
-		if (coor[0] < 'a' || coor[0] > 'j' || (coor[1] - '0') < 1 || (coor[1] - '0') > 10) printf(WRONG_POSITION);
-		char * a = strtok(NULL, " "), b;
-		if (a != NULL){
-			b = strtok(NULL, " ");
+		char * coor = strtok(NULL, " <>");
+		if (coor[0] < 'a' || coor[0] > 'j' || coor[2] < '1' || (coor[2] - '0') > 10) printf(WRONG_POSITION);
+		char * a = strtok(NULL, " ");
+		if (a == NULL){
+			return 0;
 		}
+		char * b = strtok(NULL, " ");
 		if (strcmp(a, "black") == 0){
-			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[1] - '0'] = BLACK_M;
-			else  board[coor[0] - 'a'][coor[1] - '0'] = BLACK_K;
+			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = BLACK_M;
+			else  board[coor[0] - 'a'][coor[2] - '1'] = BLACK_K;
 		}
 		else {
-			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[1] - '0'] = WHITE_M;
-			else  board[coor[0] - 'a'][coor[1] - '0'] = WHITE_K;
+			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = WHITE_M;
+			else  board[coor[0] - 'a'][coor[2] - '1'] = WHITE_K;
 		}
-		free(coor), free(a), free(b);
+		//free(coor), free(a), free(b);
 	}
 	if (strcmp(word1, "print") == 0) print_board(board);
-	free(word1);
+	//free(word1);
 	return;
 }
 
 
 int main(void)
 {
+	char board[BOARD_SIZE][BOARD_SIZE];
+	init_board(board);
 	printf(ENTER_SETTINGS);
 	printf("> ");
 	char *command = input2str(stdin);
 
 	while (strcmp(command, "quit") != 0 && strcmp(command, "start") != 0){
-		exc(command);
+		exc(command,board);
 		free(command);
 		printf("> ");
 		command = input2str(stdin);
