@@ -127,8 +127,6 @@ int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], 
 }
 
 void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
-	Move* res = NULL;
-	Move* res_head = res;
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	int direction = 1, found_ahead;
 	if (player == BLACK) direction = -1;
@@ -194,13 +192,134 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	return moves_head;
 }
 
+void print_move(Move* head){
+	printf("Move <%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
+	for (int i = 1; i < head->captures; i++){
+		printf(", <%c,%d>", head->dest[i].col + 97, head->dest[i].row + 1);
+	}
+	printf("\n");
+}
+
 void print_moves(Move* head){
 	while (head != NULL){
-		printf("Move <%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
-		for (int i = 1; i < head->captures; i++){
-			printf(", <%c,%d>", head->dest[i].col + 97, head->dest[i].row + 1);
-		}
-		printf("\n");
+		print_move(head);
 		head = head->next;
 	}
+}
+
+int get_piece_score(char piece, COLOR player){
+	if (player == WHITE) switch (piece){
+	case BLACK_M: return -1;
+	case BLACK_K: return -3;
+	case WHITE_M: return 1;
+	case WHITE_K: return 3;
+	}
+	else switch (piece){
+	case BLACK_M: return 1;
+	case BLACK_K: return 3;
+	case WHITE_M: return -1;
+	case WHITE_K: return -3;
+	}
+	return 0;
+}
+
+int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
+	//if (moves_head == NULL) return -100;
+	int score = 0, opposites = 0;
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++){
+			if (is_opposite(player, board[i][j])) opposites++;
+			score += get_piece_score(board[i][j], player);
+		}
+	if (opposites == 0) return 100;
+	return score;
+}
+
+void duplicate_move_list(Move* head, Move* new_head){
+	if (head != NULL) { new_head = malloc(sizeof(Move)); }
+	else { new_head = NULL; }
+	while (head != NULL){
+		new_head->piece.col = head->piece.col;
+		new_head->piece.row = head->piece.row;
+		new_head->captures = head->captures;
+		if (head->captures < 2){
+			new_head->dest[0].col = head->dest[0].col;
+			new_head->dest[0].row = head->dest[0].row;
+		}
+		else for (int i = 0; i < head->captures; i++){
+			new_head->dest[i].col = head->dest[i].col;
+			new_head->dest[i].row = head->dest[i].row;
+		}
+		if (head->next != NULL) { new_head->next = malloc(sizeof(Move)); }
+		else { new_head->next = NULL; }
+		head = head->next;
+		new_head = new_head->next;
+	}
+}
+
+void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE][BOARD_SIZE]){
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++) board2[i][j] = board1[i][j];
+}
+
+int minimax_rec(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int min_max){
+	get_all_moves(board, player);
+	if (moves_head == NULL) return -100;
+	if (depth == minimax_depth) return calc_score(board, player);
+
+	Move* move_list;
+	Move* curr_move;
+	int mm, tmp;
+	if (min_max == 1) mm = -200;
+	else mm = 200;
+	duplicate_move_list(moves_head, move_list);
+	curr_move = move_list;
+
+	char init_board[BOARD_SIZE][BOARD_SIZE];
+	duplicate_board(board, init_board);
+	while (curr_move != NULL){
+		exc_move(board, curr_move);
+		tmp = minimax_rec(board, (player == 0), depth + 1, -1*min_max);
+		if (min_max == 1){
+			if (tmp > mm) mm = tmp;
+			}
+		else if (tmp < mm) mm = tmp;
+		curr_move = curr_move->next;
+		duplicate_board(init_board, board);
+	}
+
+	//clear_old_moves(moves_head);
+	//moves_head = move_list;
+
+	return mm;
+}
+
+Move* run_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
+	if (moves_head == NULL) return NULL;
+	if (moves_head->next == NULL) return moves_head;
+
+	Move* move_list;
+	Move* curr_move;
+	Move* best_move;
+	int max = -200, tmp;
+	duplicate_move_list(moves_head, move_list);
+	curr_move = move_list;
+
+	char init_board[BOARD_SIZE][BOARD_SIZE];
+	duplicate_board(board, init_board);
+	while (curr_move != NULL){
+		exc_move(board, curr_move);
+		tmp = minimax_rec(board, (player == 0), 1, -1);
+		if (tmp > max){
+			max = tmp;
+			best_move = curr_move;
+		}
+		curr_move = curr_move->next;
+		duplicate_board(init_board, board);
+	}
+	
+	clear_old_moves(moves_head);
+	moves_head = move_list;
+
+	return best_move;
 }
