@@ -37,8 +37,14 @@ int is_opposite(COLOR player, char piece){
 	return 0;
 }
 
+int is_EOB(Pos piece, COLOR player){
+	if (player == WHITE) return piece.row == BOARD_SIZE - 1;
+	else return piece.row == 0;
+}
+
 Move* moves = NULL;
 Move* moves_head = NULL;
+char curr_piece;
 
 void clear_old_moves(Move* head){
 	if (head != NULL){
@@ -109,12 +115,12 @@ int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], 
 				}
 				new_dests[count].row = new_piece.row;
 				new_dests[count].col = new_piece.col;
-				found_ahead = get_capture_moves(start, new_piece, board, player, count + 1, new_dests);
-				if (found_ahead == 0){
+				if (!(is_EOB(new_piece, player) && !is_king(curr_piece))) found_ahead = get_capture_moves(start, new_piece, board, player, count + 1, new_dests);
+				if (found_ahead == 0 || (is_EOB(new_piece, player) && !is_king(curr_piece))){
 					add_move(start, new_dests, count + 1);
 					free(new_dests);
 				}
-				board[pos[p].row][pos[p].col] = tmp;
+				board[pos[p].col][pos[p].row] = tmp;
 			}
 		}
 	return found_now;
@@ -130,14 +136,16 @@ void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	for (int p = 0; p < 4; p++){
 		if (is_valid_pos(pos[p]) && pos[p].row == piece.row + direction && board[pos[p].col][pos[p].row] == EMPTY) add_move(piece, &pos[p], 0);
 		else if (is_valid_pos(pos[p]) && is_opposite(player, board[pos[p].col][pos[p].row])){
-			char tmp = board[pos[p].row][pos[p].col];
-			board[pos[p].row][pos[p].col] = EMPTY;
+			char tmp = board[pos[p].col][pos[p].row];
+			board[pos[p].col][pos[p].row] = EMPTY;
+			board[piece.col][piece.row] = EMPTY;
 			Pos new_piece = get_next_diag(piece, pos[p]);
-			if (is_valid_pos(new_piece) && board[new_piece.row][new_piece.col] == EMPTY){
-				found_ahead = get_capture_moves(piece, new_piece, board, player, 1, &new_piece);
-				if (found_ahead == 0) add_move(piece, &new_piece, 1);
+			if (is_valid_pos(new_piece) && board[new_piece.col][new_piece.row] == EMPTY){
+				if (!is_EOB(new_piece, player)) found_ahead = get_capture_moves(piece, new_piece, board, player, 1, &new_piece);
+				if (found_ahead == 0 || is_EOB(new_piece, player)) add_move(piece, &new_piece, 1);
 			}
-			board[pos[p].row][pos[p].col] = tmp;
+			board[pos[p].col][pos[p].row] = tmp;
+			board[piece.col][piece.row] = curr_piece;
 		}
 	}
 }
@@ -157,14 +165,16 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 			curr = get_next_diag(piece, curr);
 		}
 		if (is_valid_pos(curr) && is_opposite(player, board[curr.col][curr.row])){
-			char tmp = board[curr.row][curr.col];
-			board[curr.row][curr.col] = EMPTY;
+			char tmp = board[curr.col][curr.row];
+			board[curr.col][curr.row] = EMPTY;
+			board[piece.col][piece.row] = EMPTY;
 			Pos new_piece = get_next_diag(piece, curr);
-			if (is_valid_pos(new_piece) && board[new_piece.row][new_piece.col] == EMPTY){
+			if (is_valid_pos(new_piece) && board[new_piece.col][new_piece.row] == EMPTY){
 				found_ahead = get_capture_moves(piece, new_piece, board, player, 1, &new_piece);
 				if (found_ahead == 0) add_move(piece, &new_piece, 1);
 			}
-			board[curr.row][curr.col] = tmp;
+			board[curr.col][curr.row] = tmp;
+			board[piece.col][piece.row] = curr_piece;
 		}
 	}
 }
@@ -177,7 +187,8 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 			if (!is_opposite(player, board[i][j]) && board[i][j] != EMPTY){
 		p.row = j;
 		p.col = i;
-		if (is_king(board[i][j])) get_king_moves(board, player, p);
+		curr_piece = board[i][j];
+		if (is_king(curr_piece)) get_king_moves(board, player, p);
 		else get_man_moves(board, player, p);
 			}
 	return moves_head;

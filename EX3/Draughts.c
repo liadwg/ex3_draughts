@@ -7,10 +7,10 @@ int main()
 {
 	char board[BOARD_SIZE][BOARD_SIZE];
 	init_board(board);
-	board[3][3] = WHITE_K;
-	//board[2][4] = BLACK_M;
-	//board[4][4] = BLACK_M;
-	//board[5][7] = EMPTY;
+	clear_board(board);
+	board[5][7] = WHITE_M;
+	board[8][8] = BLACK_M;
+	board[6][8] = BLACK_M;
 	print_board(board);
 	print_message(WRONG_MINIMAX_DEPTH);
 	perror_message("TEST");

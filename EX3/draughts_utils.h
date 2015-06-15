@@ -6,9 +6,11 @@ void * safe_realloc(void *old_pointer, size_t size);
 
 int is_valid_pos(Pos pos);
 int is_opposite(COLOR player, char piece);
+int is_EOB(Pos piece, COLOR player);
 
 extern Move* moves;
 extern Move* moves_head;
+extern char curr_piece;
 
 void add_move(Move* res, Pos piece, Pos* dests, int dests_num);
 Pos get_pos_after_capture(Pos from, Pos to);
