@@ -1,24 +1,7 @@
 #include "draughts_utils.h"
 
 COLOR user_color = WHITE;
-int minimax_depth = 0;
-
-//int main()
-//{
-//	char board[BOARD_SIZE][BOARD_SIZE];
-//	init_board(board);
-//	board[3][3] = WHITE_K;
-//	//board[2][4] = BLACK_M;
-//	//board[4][4] = BLACK_M;
-//	//board[5][7] = EMPTY;
-//	print_board(board);
-//	print_message(WRONG_MINIMAX_DEPTH);
-//	perror_message("TEST");
-//	Move* m = get_all_moves(board, WHITE);
-//	print_moves(m);
-//	scanf_s("DONE");
-//	return 0;
-//}
+int minimax_depth = 1;
 
 void print_line(){
 	int i;
@@ -156,6 +139,7 @@ int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	if (move2do == NULL) ret_val = WIN_POS;
 	else{ 
 		exc_move(board, move2do);
+		printf("Computer: move ");
 		print_move(move2do);
 		print_board(board);
 		ret_val = GAME_ON;
@@ -171,6 +155,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	char *word1;
 	char *command;
 	Move* new_move = malloc(sizeof(Move));
+	new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
 	new_move->next = NULL;
 	int ret_val;
 	while (1){
@@ -193,7 +178,6 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 				printf(WRONG_POSITION);
 				continue;
 			}
-			new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
 			int i = 0;
 			char * dest_str = strtok(NULL, " <>to[]");
 			while (dest_str != NULL){
@@ -216,7 +200,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 				free(new_move->dest);
 				continue;
 			}
-			realloc(new_move->dest, (size_t) i);
+			realloc(new_move->dest, sizeof(Pos) * i);
 			new_move->captures = i;
 			Move * move2do = is_valid_move(moves_head, new_move);
 			if (move2do == NULL){
@@ -249,20 +233,18 @@ int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color)
 
 Move * is_valid_move(Move * moves, Move * new_move){
 	Move * current_move = moves;
-	int eq = 0;
-	while (current_move->next != NULL && eq != 1){
-		if (current_move->piece.col == new_move->piece.col && current_move->piece.row == new_move->piece.row){
-			if (current_move->captures == new_move->captures){
-				for (int i = 0; i < current_move->captures; i++){
-					if (current_move->dest[i].col != new_move->dest[i].col || current_move->dest[i].row != new_move->dest[i].row) break;
-					if (i == new_move->captures) eq = 1;
-				}
+	while (current_move != NULL){
+		if (current_move->piece.col == new_move->piece.col && 
+			current_move->piece.row == new_move->piece.row &&
+			(current_move->captures == new_move->captures || (current_move->captures == 0 && new_move->captures == 1))){
+			for (int i = 0; i < new_move->captures; i++){
+				if (current_move->dest[i].col != new_move->dest[i].col || current_move->dest[i].row != new_move->dest[i].row) break;
+				if (i == new_move->captures - 1) return current_move;
 			}
 		}
-		if (eq != 1) current_move = current_move->next;
+		current_move = current_move->next;
 	}
-	if (eq = 0) return NULL;
-	else return current_move;
+	return NULL;
 }
 
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
@@ -279,7 +261,6 @@ void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 		current_col = move->dest[i].col;
 		current_row = move->dest[i].row;
 	}
-	return;
 }
 
 int main(void)
@@ -296,10 +277,10 @@ int main(void)
 		printf("> ");
 		command = input2str(stdin);
 	}
-
+	
 	if (strcmp(command, "start") == 0){
+		print_board(board);
 		while (1){
-			print_board(board);
 			if (user_color == WHITE){
 				int ret_val = user_turn(board, WHITE);
 				if (ret_val == QUIT) break;
@@ -326,7 +307,6 @@ int main(void)
 			}
 		}
 	}
-	command = input2str(stdin);
 	free(command);
 	return 0;
 }

@@ -182,6 +182,7 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 
 Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	moves_head = NULL;
+	moves = NULL;
 	Pos p;
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++)
@@ -196,7 +197,7 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 }
 
 void print_move(Move* head){
-	printf("Move <%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
+	printf("<%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
 	for (int i = 1; i < head->captures; i++){
 		printf(", <%c,%d>", head->dest[i].col + 97, head->dest[i].row + 1);
 	}
