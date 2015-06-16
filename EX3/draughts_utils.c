@@ -23,6 +23,13 @@ void * safe_realloc(void *old_pointer, size_t size){
 }
 #define realloc(x, y) safe_realloc((x), (y));
 
+// Globals
+Move* moves = NULL;
+Move* moves_head = NULL;
+char curr_piece;
+COLOR curr_player;
+Move* best_move;
+
 int is_valid_pos(Pos pos){
 	return (pos.col >= 0 && pos.col < BOARD_SIZE && pos.row >= 0 && pos.row < BOARD_SIZE);
 }
@@ -41,10 +48,6 @@ int is_EOB(Pos piece, COLOR player){
 	if (player == WHITE) return piece.row == BOARD_SIZE - 1;
 	else return piece.row == 0;
 }
-
-Move* moves = NULL;
-Move* moves_head = NULL;
-char curr_piece;
 
 void clear_old_moves(Move* head){
 	if (head != NULL){
@@ -178,7 +181,8 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 }
 
 Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
-	clear_old_moves(moves_head);
+	//clear_old_moves(moves_head);
+	moves_head = NULL;
 	Pos p;
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++)
@@ -224,7 +228,7 @@ int get_piece_score(char piece, COLOR player){
 }
 
 int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
-	//if (moves_head == NULL) return -100;
+	if (moves_head == NULL) return -100;
 	int score = 0, opposites = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++){
@@ -235,91 +239,144 @@ int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	return score;
 }
 
-void duplicate_move_list(Move* head, Move* new_head){
-	if (head != NULL) { new_head = malloc(sizeof(Move)); }
-	else { new_head = NULL; }
-	while (head != NULL){
-		new_head->piece.col = head->piece.col;
-		new_head->piece.row = head->piece.row;
-		new_head->captures = head->captures;
-		if (head->captures < 2){
-			new_head->dest[0].col = head->dest[0].col;
-			new_head->dest[0].row = head->dest[0].row;
-		}
-		else for (int i = 0; i < head->captures; i++){
-			new_head->dest[i].col = head->dest[i].col;
-			new_head->dest[i].row = head->dest[i].row;
-		}
-		if (head->next != NULL) { new_head->next = malloc(sizeof(Move)); }
-		else { new_head->next = NULL; }
-		head = head->next;
-		new_head = new_head->next;
-	}
-}
-
 void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE][BOARD_SIZE]){
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++) board2[i][j] = board1[i][j];
 }
 
-int minimax_rec(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int min_max){
-	get_all_moves(board, player);
-	if (moves_head == NULL) return -100;
-	if (depth == minimax_depth) return calc_score(board, player);
+int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta){
+	Move* move_list = get_all_moves(board, player);
+	Move* curr_move = move_list;
+	if (depth == 0 && curr_move == NULL){
+		best_move = NULL;
+		return -100;
+	}
+	if (depth == minimax_depth || curr_move == NULL) return calc_score(board, curr_player);
 
-	Move* move_list;
-	Move* curr_move;
-	int mm, tmp;
-	if (min_max == 1) mm = -200;
-	else mm = 200;
-	duplicate_move_list(moves_head, move_list);
-	curr_move = move_list;
+	if (depth == 0){
+		best_move = curr_move;
+		if (curr_move->next == NULL) return 100;
+	}
 
+	int tmp;
 	char init_board[BOARD_SIZE][BOARD_SIZE];
 	duplicate_board(board, init_board);
-	while (curr_move != NULL){
-		exc_move(board, curr_move);
-		tmp = minimax_rec(board, (player == 0), depth + 1, -1*min_max);
-		if (min_max == 1){
-			if (tmp > mm) mm = tmp;
+	if (depth % 2 == 0){
+		while (curr_move != NULL){
+			exc_move(board, curr_move);
+			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
+			if (tmp > alpha){
+				alpha = tmp;
+				if (depth == 0) best_move = curr_move;
 			}
-		else if (tmp < mm) mm = tmp;
-		curr_move = curr_move->next;
-		duplicate_board(init_board, board);
-	}
-
-	//clear_old_moves(moves_head);
-	//moves_head = move_list;
-
-	return mm;
-}
-
-Move* run_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
-	if (moves_head == NULL) return NULL;
-	if (moves_head->next == NULL) return moves_head;
-
-	Move* move_list;
-	Move* curr_move;
-	Move* best_move;
-	int max = -200, tmp;
-	duplicate_move_list(moves_head, move_list);
-	curr_move = move_list;
-
-	char init_board[BOARD_SIZE][BOARD_SIZE];
-	duplicate_board(board, init_board);
-	while (curr_move != NULL){
-		exc_move(board, curr_move);
-		tmp = minimax_rec(board, (player == 0), 1, -1);
-		if (tmp > max){
-			max = tmp;
-			best_move = curr_move;
+			if (alpha >= beta){
+				if (depth != 0) clear_old_moves(move_list);
+				return alpha;
+			}
+			curr_move = curr_move->next;
+			duplicate_board(init_board, board);
 		}
-		curr_move = curr_move->next;
-		duplicate_board(init_board, board);
+		if (depth != 0) clear_old_moves(move_list);
+		return alpha;
 	}
-	
-	clear_old_moves(moves_head);
-	moves_head = move_list;
-
-	return best_move;
+	else{
+		while (curr_move != NULL){
+			exc_move(board, curr_move);
+			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
+			if (tmp < beta){
+				beta = tmp;
+				if (depth == 0) best_move = curr_move;
+			}
+			if (alpha >= beta){
+				if (depth != 0) clear_old_moves(move_list);
+				return beta;
+			}
+			curr_move = curr_move->next;
+			duplicate_board(init_board, board);
+		}
+		if (depth != 0) clear_old_moves(move_list);
+		return beta;
+	}
 }
+
+// no prunning minimax, not in use
+//
+//void duplicate_move_list(Move* head, Move* new_head){
+//	if (head != NULL) { new_head = malloc(sizeof(Move)); }
+//	else { new_head = NULL; }
+//	while (head != NULL){
+//		new_head->piece.col = head->piece.col;
+//		new_head->piece.row = head->piece.row;
+//		new_head->captures = head->captures;
+//		if (head->captures < 2){
+//			new_head->dest[0].col = head->dest[0].col;
+//			new_head->dest[0].row = head->dest[0].row;
+//		}
+//		else for (int i = 0; i < head->captures; i++){
+//			new_head->dest[i].col = head->dest[i].col;
+//			new_head->dest[i].row = head->dest[i].row;
+//		}
+//		if (head->next != NULL) { new_head->next = malloc(sizeof(Move)); }
+//		else { new_head->next = NULL; }
+//		head = head->next;
+//		new_head = new_head->next;
+//	}
+//}
+//
+//int minimax_rec(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int min_max){
+//	get_all_moves(board, player);
+//	if (moves_head == NULL) return -100;
+//	if (depth == minimax_depth) return calc_score(board, curr_player);
+//
+//	Move* move_list;
+//	Move* curr_move;
+//	int mm = -1 * min_max * 200, tmp;
+//	duplicate_move_list(moves_head, move_list);
+//	curr_move = move_list;
+//
+//	char init_board[BOARD_SIZE][BOARD_SIZE];
+//	duplicate_board(board, init_board);
+//	while (curr_move != NULL){
+//		exc_move(board, curr_move);
+//		tmp = minimax_rec(board, (player == 0), depth + 1, -1 * min_max);
+//		if (min_max == 1){
+//			if (tmp > mm) mm = tmp;
+//		}
+//		else if (tmp < mm) mm = tmp;
+//		curr_move = curr_move->next;
+//		duplicate_board(init_board, board);
+//	}
+//
+//	return mm;
+//}
+//
+//Move* run_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
+//	if (moves_head == NULL) return NULL;
+//	if (moves_head->next == NULL) return moves_head;
+//
+//	Move* move_list;
+//	Move* curr_move;
+//	Move* best_move;
+//	int max = -200, tmp;
+//	curr_player = player;
+//	duplicate_move_list(moves_head, move_list);
+//	curr_move = move_list;
+//
+//	char init_board[BOARD_SIZE][BOARD_SIZE];
+//	duplicate_board(board, init_board);
+//	while (curr_move != NULL){
+//		exc_move(board, curr_move);
+//		tmp = minimax_rec(board, (player == 0), 1, -1);
+//		if (tmp > max){
+//			max = tmp;
+//			best_move = curr_move;
+//		}
+//		curr_move = curr_move->next;
+//		duplicate_board(init_board, board);
+//	}
+//
+//	clear_old_moves(moves_head);
+//	moves_head = move_list;
+//
+//	return best_move;
+//}
