@@ -181,7 +181,6 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 }
 
 Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
-	//clear_old_moves(moves_head);
 	moves_head = NULL;
 	Pos p;
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -271,12 +270,14 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 			}
 			if (alpha >= beta){
 				if (depth != 0) clear_old_moves(move_list);
+				else moves_head = move_list;
 				return alpha;
 			}
 			curr_move = curr_move->next;
 			duplicate_board(init_board, board);
 		}
 		if (depth != 0) clear_old_moves(move_list);
+		else moves_head = move_list;
 		return alpha;
 	}
 	else{
@@ -289,12 +290,14 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 			}
 			if (alpha >= beta){
 				if (depth != 0) clear_old_moves(move_list);
+				else moves_head = move_list;
 				return beta;
 			}
 			curr_move = curr_move->next;
 			duplicate_board(init_board, board);
 		}
 		if (depth != 0) clear_old_moves(move_list);
+		else moves_head = move_list;
 		return beta;
 	}
 }

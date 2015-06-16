@@ -149,15 +149,15 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 }
 
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
-	get_all_moves(board, color);
-	Move * move2do = minimax(board, color);
+	//get_all_moves(board, color);
+	int score = alpha_beta_minimax(board, color, 0, -100, 100);
+	Move * move2do = best_move;
 	int ret_val;
 	if (move2do == NULL) ret_val = WIN_POS;
 	else{ 
 		exc_move(board, move2do);
 		print_move(move2do);
 		print(board);
-		clear_old_moves(moves_head);
 		ret_val = GAME_ON;
 	}
 	clear_old_moves(moves_head);
