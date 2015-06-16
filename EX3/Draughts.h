@@ -26,18 +26,11 @@ typedef char** board_t;
 #define WHITE_WIN "white player win!" 
 #define BLACK_WIN "black player win!" 
 #define perror_message(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name))
-#define print_message(message) (printf("%s", message));
+#define print_message(message) (printf("%s", message))
 
 #define QUIT 2
 #define WIN_POS 0
 #define GAME_ON 1
-
-void print_board(char board[BOARD_SIZE][BOARD_SIZE]);
-void init_board(char board[BOARD_SIZE][BOARD_SIZE]);
-void clear_board(char board[BOARD_SIZE][BOARD_SIZE]);
-char* input2str(FILE* pFile);
-void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]);
-
 
 typedef enum { WHITE = 0, BLACK = 1 } COLOR;
 
@@ -55,7 +48,21 @@ typedef struct move{
 	struct move* next;
 } Move;
 
+void print_board(char board[BOARD_SIZE][BOARD_SIZE]);
+void init_board(char board[BOARD_SIZE][BOARD_SIZE]);
+void clear_board(char board[BOARD_SIZE][BOARD_SIZE]);
+char* input2str(FILE* pFile);
+void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]);
+int computer_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color);
+int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color);
+int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color);
+Move * is_valid_move(Move * moves, Move * new_move);
+void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move);
+
 
 extern COLOR user_color;
 extern int minimax_depth;
 #endif
+
+
+
