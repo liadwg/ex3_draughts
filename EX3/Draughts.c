@@ -118,7 +118,6 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 		int x = atoi(strtok(NULL, " "));
 		if (x > 6 || x < 1) printf(WRONG_MINIMAX_DEPTH);
 		else minimax_depth = x;
-		//printf(minimax_depth);
 	}
 	if (strcmp(word1, "user_color") == 0){
 		char * color = strtok(NULL, " ");
@@ -134,9 +133,7 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 		char * coor = strtok(NULL, " <>");
 		if (coor[0] < 'a' || coor[0] > 'j' || coor[2] < '1' || (coor[2] - '0') > 10) printf(WRONG_POSITION);
 		char * a = strtok(NULL, " ");
-		if (a == NULL){
-			return 0;
-		}
+		if (a == NULL) return;
 		char * b = strtok(NULL, " ");
 		if (strcmp(a, "black") == 0){
 			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = BLACK_M;
@@ -146,13 +143,140 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = WHITE_M;
 			else  board[coor[0] - 'a'][coor[2] - '1'] = WHITE_K;
 		}
-		//free(coor), free(a), free(b);
 	}
 	if (strcmp(word1, "print") == 0) print_board(board);
-	//free(word1);
 	return;
 }
 
+int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
+	get_all_moves(board, color);
+	Move * move2do = minimax(board, color);
+	int ret_val;
+	if (move2do == NULL) ret_val = WIN_POS;
+	else{ 
+		exc_move(board, move2do);
+		print_move(move2do);
+		print(board);
+		clear_old_moves(moves_head);
+		ret_val = GAME_ON;
+	}
+	clear_old_moves(moves_head);
+	return ret_val;
+}
+
+int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
+	get_all_moves(board, color);
+	if (moves == NULL) return 0;
+	printf(ENTER_YOUR_MOVE);
+	char *word1;
+	char *command;
+	Move* new_move = malloc(sizeof(Move));
+	new_move->next = NULL;
+	int ret_val;
+	while (1){
+		printf("> ");
+		command = input2str(stdin);
+		word1 = strtok(command, " ");
+		if (strcmp(word1, "quit")){
+			ret_val = QUIT;
+			break;
+		}
+		if (strcmp(word1, "get_moves")){
+			print_moves(moves_head);
+			continue;
+		}
+		if (strcmp(word1, "move")){
+			word1 = strtok(NULL, " <>");
+			new_move->piece.col = word1[0] - 'a';
+			new_move->piece.row = word1[2] - '1';
+			if (!is_valid_pos(new_move->piece)){
+				printf(WRONG_POSITION);
+				continue;
+			}
+			new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
+			int i = 0;
+			while (word1 != NULL){
+				word1 = strtok(NULL, " <>to[]");
+				new_move->dest[i].col = word1[0] - 'a';
+				new_move->dest[i].row = word1[2] - '1';
+				if (!is_valid_pos(new_move->dest[i])){
+					i = -1;
+					break;
+				}
+				i++;
+			}
+			if (i == -1){
+				printf(WRONG_POSITION);
+				free(new_move->dest);
+				continue;
+			}
+			if (!is_valid_piece(board, new_move, color)){
+				printf(NO_DISC);
+				free(new_move->dest);
+				continue;
+			}
+			realloc(new_move->dest, i);
+			Move * move2do = is_valid_move(moves_head, new_move);
+			if (move2do == NULL){
+				printf(ILLEGAL_MOVE);
+				free(new_move->dest);
+				continue;
+			}
+			else{
+				exc_move(board, move2do);
+				print_board(board);
+				ret_val = GAME_ON;
+				break;
+			}
+		}
+	}
+	clear_old_moves(new_move);
+	clear_old_moves(moves_head);
+	return ret_val;
+}
+
+int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color){
+	if (color = BLACK){
+		if (board[move->piece.col][move->piece.row] != BLACK_M || board[move->piece.col][move->piece.row] != BLACK_K) return 0;
+	}
+	else{
+		if (board[move->piece.col][move->piece.row] != WHITE_M || board[move->piece.col][move->piece.row] != WHITE_M) return 0;
+	}
+	return 1;
+}
+
+Move * is_valid_move(Move * moves, Move * new_move){
+	Move * current_move = moves;
+	int eq = 0;
+	while (current_move->next != NULL && eq != 1){
+		if (current_move->piece.col == new_move->piece.col && current_move->piece.row == new_move->piece.row){
+			if (sizeof(current_move->dest) == sizeof(new_move->dest)){
+				for (int i = 0; i < sizeof(new_move->dest); i++){
+					if (current_move->dest[i].col != new_move->dest[i].col || current_move->dest[i].row != new_move->dest[i].row) break;
+					if (i == sizeof(new_move->dest)) eq = 1;
+				}
+			}
+		}
+		if (eq != 1) current_move = current_move->next;
+	}
+	if (eq = 0) return NULL;
+	else return current_move;
+}
+
+void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
+	int current_col = move->piece.col;
+	int current_row = move->piece.row;
+	for (int i = 0; i < sizeof(move->dest); i++){
+		board[move->dest[i].col][move->dest[i].row] = board[current_col][current_row];
+		board[current_col][current_row] = EMPTY;
+		if (move->captures > 0){
+			board[(current_col + move->dest[i].col) / 2][(current_row + move->dest[i].row) / 2] = EMPTY; //check int derive
+		}
+		current_col = move->dest[i].col;
+		current_row = move->dest[i].row;
+	}
+	return;
+}
 
 int main(void)
 {
@@ -168,9 +292,39 @@ int main(void)
 		printf("> ");
 		command = input2str(stdin);
 	}
-	if (strcmp(command, "start") == 0)
-		free(command);
-	//***move to game state***
+
+	if (strcmp(command, "start") == 0){
+		char *command;
+		while (1){
+			print(board);
+			if (user_color == WHITE){
+				int ret_val = user_turn(board, WHITE);
+				if (ret_val == QUIT) break;
+				if (ret_val == WIN_POS){
+					printf(BLACK_WIN);
+					break;
+				}
+				if (computer_turn(board, BLACK) == WIN_POS){
+					printf(WHITE_WIN);
+					break;
+				}
+			}
+			else{
+				if (computer_turn(board, WHITE) == WIN_POS){
+					printf(BLACK_WIN);
+					break;
+				}
+				int ret_val = user_turn(board, BLACK);
+				if (ret_val == QUIT) break;
+				if (ret_val == WIN_POS){
+					printf(WHITE_WIN);
+					break;
+				}
+			}
+		}
+	}
 	free(command);
 	return 0;
 }
+
+
