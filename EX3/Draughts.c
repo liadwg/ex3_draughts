@@ -519,12 +519,14 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	printf(ENTER_YOUR_MOVE);
 	char *word1;
 	char *command = NULL;
-	Move* new_move = malloc(sizeof(Move));
-	new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
-	new_move->next = NULL;
+	Move* new_move = NULL;
 	int ret_val;
 	while (1){
 		//printf("> ");
+		if (new_move != NULL) clear_old_moves(new_move);
+		new_move = malloc(sizeof(Move));
+		new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
+		new_move->next = NULL;
 		if (command != NULL) free(command);
 		command = input2str(stdin);
 		word1 = strtok(command, " ");
@@ -561,12 +563,10 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			}
 			if (i == -1){
 				printf(WRONG_POSITION);
-				free(new_move->dest);
 				continue;
 			}
 			if (!is_valid_piece(board, new_move, color)){
 				printf(NO_DISC);
-				free(new_move->dest);
 				continue;
 			}
 			new_move->dest = realloc(new_move->dest, sizeof(Pos) * i);
@@ -574,7 +574,6 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			Move * move2do = is_valid_move(moves_head, new_move);
 			if (move2do == NULL){
 				printf(ILLEGAL_MOVE);
-				free(new_move->dest);
 				continue;
 			}
 			else{
