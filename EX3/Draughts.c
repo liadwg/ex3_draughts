@@ -1,27 +1,39 @@
 #include "Draughts.h"
 
-// safe_malloc/realloc verifies that tht memory allocation succeeded
+// safe_funcs verifies that that the original functions succeeded
 void * safe_malloc(size_t size){
 	void *res = malloc(size);
 	if (!res && size != 0){
-		printf("Memory allocation failed, terimanting..");
-		//if (head != NULL) clear_memory(head);
+		perror_message("malloc");
 		abort();
 	}
 	else return res;
 }
-#define malloc(x) safe_malloc(x);
+#define malloc(x) safe_malloc(x)
 
 void * safe_realloc(void *old_pointer, size_t size){
 	void *res = realloc(old_pointer, size);
 	if (!old_pointer && size != 0){
-		printf("Memory allocation failed, terimanting..");
-		//if (head != NULL) clear_memory(head);
+		perror_message("realloc");
 		abort();
 	}
 	else return res;
 }
-#define realloc(x, y) safe_realloc((x), (y));
+#define realloc(x, y) safe_realloc((x), (y))
+
+int safe_fgetc(FILE *stream){
+	int res = fgetc(stream);
+	if (res == EOF){
+		perror_message("fgetc");
+		abort();
+	}
+	else return res;
+}
+#define fgetc(x) safe_fgetc(x)
+
+#define printf(...) \
+	if (printf(__VA_ARGS__) < 0) {perror_message("printf"); abort();} \
+		else (void)0
 
 // Globals
 Move* moves = NULL;
@@ -463,7 +475,7 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	curr_player = color;
 	//print_board(board);
-	int tmp = alpha_beta_minimax(board, color, 0, -100, 100);
+	alpha_beta_minimax(board, color, 0, -100, 100);
 	//printf("$$$$$$$$$$$$$$$\nmove ");
 	//print_move(best_move);
 	//printf("got score %d\n$$$$$$$$$$$$$$$$\n", tmp);
