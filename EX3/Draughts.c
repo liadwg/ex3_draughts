@@ -668,7 +668,7 @@ int main(void)
 	printf(ENTER_SETTINGS);
 	//printf("> ");
 	char *command = input2str(stdin);
-	int win_pos;
+	int win_pos = 0;
 
 	while (strcmp(command, "quit") != 0){
 		if (strcmp(command, "start") == 0){
@@ -687,9 +687,9 @@ int main(void)
 	}
 	
 	if (strcmp(command, "start") == 0){
-		print_board(board);
 		while (1){
 			if (user_color == WHITE){
+				print_board(board);
 				int ret_val = user_turn(board, WHITE);
 				if (ret_val == QUIT) break;
 				if (ret_val == WIN_POS){
