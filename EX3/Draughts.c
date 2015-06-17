@@ -604,6 +604,19 @@ void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 	}
 }
 
+int is_valid_board(char board[BOARD_SIZE][BOARD_SIZE]){
+	int b_num = 0;
+	int w_num =0;
+	for (int i = 0; i < BOARD_SIZE; i++){
+		for (int j = 0; j < BOARD_SIZE; j++){
+			if (board[i][j] == BLACK_M || board[i][j] == BLACK_K) b_num++;
+			if (board[i][j] == WHITE_M || board[i][j] == WHITE_K) w_num++;
+		}
+	}
+	if (b_num == 0 || w_num == 0 || b_num > 20 || w_num > 20) return 0;
+	return 1;
+}
+
 int main(void)
 {
 	char board[BOARD_SIZE][BOARD_SIZE];
@@ -621,7 +634,16 @@ int main(void)
 	char *command = input2str(stdin);
 	int win_pos;
 
-	while (strcmp(command, "quit") != 0 && strcmp(command, "start") != 0){
+	while (strcmp(command, "quit") != 0){
+		if (strcmp(command, "start") == 0){
+			if (is_valid_board(board)) break;
+			else{
+				printf(WROND_BOARD_INITIALIZATION);
+				free(command);
+				command = input2str(stdin);
+				continue;
+			}
+		}
 		exc(command,board);
 		free(command);
 		//printf("> ");

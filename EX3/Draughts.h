@@ -48,6 +48,7 @@ typedef struct move{
 	struct move* next;
 } Move;
 
+int is_valid_board(char board[BOARD_SIZE][BOARD_SIZE]);
 void print_board(char board[BOARD_SIZE][BOARD_SIZE]);
 void init_board(char board[BOARD_SIZE][BOARD_SIZE]);
 void clear_board(char board[BOARD_SIZE][BOARD_SIZE]);
