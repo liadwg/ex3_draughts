@@ -432,23 +432,26 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 	}
 	if (strcmp(word1, "clear") == 0) clear_board(board);
 	if (strcmp(word1, "rm") == 0){
-		char * coor = strtok(NULL, " <>");
-		if (coor[0] < 'a' || coor[0] > 'j' || coor[2] < '1' || (coor[2] - '0') > 10) printf(WRONG_POSITION);
-		else board[coor[0] - 'a'][coor[2]-'1'] = EMPTY;
+		char * coor1 = strtok(NULL, " <,>");
+		char * coor2 = strtok(NULL, " <,>");
+		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) printf(WRONG_POSITION);
+		else board[coor1[0] - 'a'][atoi(coor2) - 1] = EMPTY;
 	}
 	if (strcmp(word1, "set") == 0){
-		char * coor = strtok(NULL, " <>");
-		if (coor[0] < 'a' || coor[0] > 'j' || coor[2] < '1' || (coor[2] - '0') > 10) printf(WRONG_POSITION);
+		//char * coor = strtok(NULL, " <>");
+		char * coor1 = strtok(NULL, " <,>");
+		char * coor2 = strtok(NULL, " <,>");
+		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) printf(WRONG_POSITION);
 		char * a = strtok(NULL, " ");
 		if (a == NULL) return;
 		char * b = strtok(NULL, " ");
 		if (strcmp(a, "black") == 0){
-			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = BLACK_M;
-			else  board[coor[0] - 'a'][coor[2] - '1'] = BLACK_K;
+			if (strcmp(b, "m") == 0) board[coor1[0] - 'a'][atoi(coor2)-1] = BLACK_M;
+			else  board[coor1[0] - 'a'][atoi(coor2) - 1] = BLACK_K;
 		}
 		else {
-			if (strcmp(b, "m") == 0) board[coor[0] - 'a'][coor[2] - '1'] = WHITE_M;
-			else  board[coor[0] - 'a'][coor[2] - '1'] = WHITE_K;
+			if (strcmp(b, "m") == 0) board[coor1[0] - 'a'][atoi(coor2)-1] = WHITE_M;
+			else  board[coor1[0] - 'a'][atoi(coor2) - 1] = WHITE_K;
 		}
 	}
 	if (strcmp(word1, "print") == 0) print_board(board);
@@ -498,24 +501,27 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			continue;
 		}
 		if (strcmp(word1, "move") == 0){
-			char * piece_str = strtok(NULL, " <>");
-			new_move->piece.col = piece_str[0] - 'a';
-			new_move->piece.row = piece_str[2] - '1';
+			char * piece_coor1 = strtok(NULL, " <,>");
+			char * piece_coor2 = strtok(NULL, " <,>");
+			new_move->piece.col = piece_coor1[0] - 'a';
+			new_move->piece.row = atoi(piece_coor2) - 1;
 			if (!is_valid_pos(new_move->piece)){
 				printf(WRONG_POSITION);
 				continue;
 			}
 			int i = 0;
-			char * dest_str = strtok(NULL, " <>to[]");
-			while (dest_str != NULL){
-				new_move->dest[i].col = dest_str[0] - 'a';
-				new_move->dest[i].row = dest_str[2] - '1';
+			char * dest_coor1 = strtok(NULL, " <,>to");
+			char * dest_coor2 = strtok(NULL, " <,>to");
+			while (dest_coor1 != NULL){
+				new_move->dest[i].col = dest_coor1[0] - 'a';
+				new_move->dest[i].row = atoi(dest_coor2) - 1;
 				if (!is_valid_pos(new_move->dest[i])){
 					i = -1;
 					break;
 				}
 				i++;
-				dest_str = strtok(NULL, " <>to[]");
+				dest_coor1 = strtok(NULL, " <,>[]");
+				if (dest_coor1 != NULL) dest_coor2 = strtok(NULL, " <,>[]");
 			}
 			if (i == -1){
 				printf(WRONG_POSITION);
