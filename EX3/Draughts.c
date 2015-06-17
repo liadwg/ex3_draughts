@@ -262,7 +262,7 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	Move* move_list = get_all_moves(board, player);
 	Move* curr_move = move_list;
 	//printf("---------- minimax level %d player %d ------------\n", depth, player);
-	print_moves(move_list);
+	//print_moves(move_list);
 	if (depth == 0 && curr_move == NULL){
 		best_move = NULL;
 		return -100;
@@ -293,6 +293,7 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 			if (alpha >= beta){
 				if (depth != 0) clear_old_moves(move_list);
 				else moves_head = move_list;
+				duplicate_board(init_board, board);
 				return alpha;
 			}
 			curr_move = curr_move->next;
@@ -316,6 +317,7 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 			if (alpha >= beta){
 				if (depth != 0) clear_old_moves(move_list);
 				else moves_head = move_list;
+				duplicate_board(init_board, board);
 				return beta;
 			}
 			curr_move = curr_move->next;
@@ -460,10 +462,12 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	curr_player = color;
+	//print_board(board);
 	int tmp = alpha_beta_minimax(board, color, 0, -100, 100);
-	printf("$$$$$$$$$$$$$$$\nmove ");
-	print_move(best_move);
-	printf("got score %d\n$$$$$$$$$$$$$$$$\n", tmp);
+	//printf("$$$$$$$$$$$$$$$\nmove ");
+	//print_move(best_move);
+	//printf("got score %d\n$$$$$$$$$$$$$$$$\n", tmp);
+	//print_board(board);
 	Move * move2do = best_move;
 	int ret_val;
 	if (move2do == NULL) ret_val = WIN_POS;
