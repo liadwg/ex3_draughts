@@ -1,8 +1,10 @@
 #ifndef DRAUGHTS_
 #define DRAUGHTS_
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define WHITE_M 'm'
 #define WHITE_K 'k'
@@ -62,6 +64,9 @@ void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move);
 
 extern COLOR user_color;
 extern int minimax_depth;
+
+#include "draughts_utils.h"
+
 #endif
 
 

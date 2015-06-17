@@ -1,4 +1,5 @@
-#include "draughts_utils.h"
+//#include "draughts_utils.h"
+#include "Draughts.h"
 
 COLOR user_color = WHITE;
 int minimax_depth = 1;
@@ -66,15 +67,15 @@ void clear_board(char board[BOARD_SIZE][BOARD_SIZE]){
 char* input2str(FILE* pFile)
 {
 	char *str;
-	int ch, pch;
+	char ch, pch;
 	size_t size = 10;
 	size_t len = 0;
 	str = malloc(sizeof(char)*size);
 	ch = fgetc(pFile);
-	pch = NULL;
+	pch = '~';
 	while (ch != EOF && ch != '\n')
 	{
-		if ((pch != NULL && pch != ' ') || (ch != ' ')){
+		if ((pch != '~' && pch != ' ') || (ch != ' ')){
 			str[len++] = ch;
 			if (len == size)
 			{
@@ -133,7 +134,8 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	//get_all_moves(board, color);
-	int score = alpha_beta_minimax(board, color, 0, -100, 100);
+	//int score = alpha_beta_minimax(board, color, 0, -100, 100);
+	alpha_beta_minimax(board, color, 0, -100, 100);
 	Move * move2do = best_move;
 	int ret_val;
 	if (move2do == NULL) ret_val = WIN_POS;
@@ -200,7 +202,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 				free(new_move->dest);
 				continue;
 			}
-			realloc(new_move->dest, sizeof(Pos) * i);
+			new_move->dest = realloc(new_move->dest, sizeof(Pos) * i);
 			new_move->captures = i;
 			Move * move2do = is_valid_move(moves_head, new_move);
 			if (move2do == NULL){
