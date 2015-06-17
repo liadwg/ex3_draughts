@@ -495,6 +495,7 @@ int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 }
 
 int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
+	//clear_old_moves(moves_head);
 	get_all_moves(board, color);
 	if (moves_head == NULL) return WIN_POS;
 	printf(ENTER_YOUR_MOVE);
@@ -506,6 +507,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	int ret_val;
 	while (1){
 		//printf("> ");
+		//if (command != NULL) free(command);
 		command = input2str(stdin);
 		word1 = strtok(command, " ");
 		if (strcmp(word1, "quit") == 0){
@@ -697,6 +699,7 @@ int main(void)
 		}
 	}
 	free(command);
+	clear_old_moves(moves_head);
 	if (win_pos == 1){
 		command = input2str(stdin);
 		free(command);
