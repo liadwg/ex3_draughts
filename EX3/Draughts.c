@@ -14,6 +14,7 @@ void * safe_malloc(size_t size){
 void * safe_realloc(void *old_pointer, size_t size){
 	void *res = realloc(old_pointer, size);
 	if (!old_pointer && size != 0){
+		free(old_pointer);
 		perror_message("realloc");
 		abort();
 	}
@@ -517,14 +518,14 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	if (moves_head == NULL) return WIN_POS;
 	printf(ENTER_YOUR_MOVE);
 	char *word1;
-	char *command;
+	char *command = NULL;
 	Move* new_move = malloc(sizeof(Move));
 	new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
 	new_move->next = NULL;
 	int ret_val;
 	while (1){
 		//printf("> ");
-		//if (command != NULL) free(command);
+		if (command != NULL) free(command);
 		command = input2str(stdin);
 		word1 = strtok(command, " ");
 		if (strcmp(word1, "quit") == 0){
@@ -584,6 +585,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			}
 		}
 	}
+	free(command);
 	clear_old_moves(new_move);
 	clear_old_moves(moves_head);
 	return ret_val;
@@ -718,8 +720,11 @@ int main(void)
 			}
 		}
 	}
-	if (win_pos == 1) command = input2str(stdin);
-	free(command);
+	if (win_pos == 1){
+		free(command);
+		command = input2str(stdin);
+	}
+		free(command);
 }
 
 
