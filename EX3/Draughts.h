@@ -36,8 +36,6 @@ typedef char** board_t;
 
 typedef enum { WHITE = 0, BLACK = 1 } COLOR;
 
-//typedef enum { COMPUTER = 0, USER = 1 } TURN;
-
 typedef struct pos{
 	int col;
 	int row;
@@ -61,11 +59,39 @@ int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color)
 Move * is_valid_move(Move * moves, Move * new_move);
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move);
 
+// safe_malloc/realloc verifies that tht memory allocation succeeded
+void * safe_malloc(size_t size);
+void * safe_realloc(void *old_pointer, size_t size);
 
+int is_valid_pos(Pos pos);
+int is_king(char piece);
+int is_opposite(COLOR player, char piece);
+int is_EOB(Pos piece, COLOR player);
+
+void clear_old_moves(Move* head);
+void add_move(Pos piece, Pos* dests, int move_captures);
+Pos get_next_diag(Pos from, Pos to);
+Pos get_prev_diag(Pos from, Pos to);
+int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int count, Pos* dests);
+void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece);
+void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece);
+Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player);
+
+void print_move(Move* head);
+void print_moves(Move* head);
+int get_piece_score(char piece, COLOR player);
+int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player);
+void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE][BOARD_SIZE]);
+int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta);
+
+// Globals
 extern COLOR user_color;
 extern int minimax_depth;
-
-#include "draughts_utils.h"
+extern Move* moves;
+extern Move* moves_head;
+extern char curr_piece;
+extern COLOR curr_player;
+extern Move* best_move;
 
 #endif
 
