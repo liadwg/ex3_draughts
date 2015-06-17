@@ -280,8 +280,6 @@ void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE
 int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta){
 	Move* move_list = get_all_moves(board, player);
 	Move* curr_move = move_list;
-	//printf("---------- minimax level %d player %d ------------\n", depth, player);
-	//print_moves(move_list);
 	if (depth == 0 && curr_move == NULL){
 		best_move = NULL;
 		return -100;
@@ -301,13 +299,11 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	int tmp;
 	char init_board[BOARD_SIZE][BOARD_SIZE];
 	duplicate_board(board, init_board);
+	// MAX
 	if (depth % 2 == 0){
 		while (curr_move != NULL){
 			exc_move(board, curr_move);
-			//printf("********\nmove by player %d ", player);
-			//print_move(curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
-			//printf("got score %d\n*************\n", tmp);
 			if (tmp > alpha){
 				alpha = tmp;
 				if (depth == 0) best_move = curr_move;
@@ -325,13 +321,11 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 		else moves_head = move_list;
 		return alpha;
 	}
+	// MIN
 	else{
 		while (curr_move != NULL){
 			exc_move(board, curr_move);
-			//printf("********\nmove by player %d ", player);
-			//print_move(curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
-			//printf("got score %d\n*************\n", tmp);
 			if (tmp < beta){
 				beta = tmp;
 				if (depth == 0) best_move = curr_move;
@@ -413,8 +407,7 @@ void clear_board(char board[BOARD_SIZE][BOARD_SIZE]){
 }
 
 // handles user input (unknown length), returns a string without redundent white spaces after each new line
-char* input2str(FILE* pFile)
-{
+char* input2str(FILE* pFile){
 	char *str;
 	char ch, pch;
 	size_t size = 10;
@@ -465,7 +458,6 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 		else board[coor1[0] - 'a'][atoi(coor2) - 1] = EMPTY;
 	}
 	if (strcmp(word1, "set") == 0){
-		//char * coor = strtok(NULL, " <>");
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
 		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) { printf(WRONG_POSITION); }
@@ -488,12 +480,7 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 // manages the computer's turn
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	curr_player = color;
-	//print_board(board);
 	alpha_beta_minimax(board, color, 0, -100, 100);
-	//printf("$$$$$$$$$$$$$$$\nmove ");
-	//print_move(best_move);
-	//printf("got score %d\n$$$$$$$$$$$$$$$$\n", tmp);
-	//print_board(board);
 	Move * move2do = best_move;
 	int ret_val;
 	if (move2do == NULL) ret_val = WIN_POS;
@@ -511,7 +498,6 @@ int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 
 // manages the users turn, game state user input loop
 int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
-	//clear_old_moves(moves_head);
 	get_all_moves(board, color);
 	if (moves_head == NULL) return WIN_POS;
 	printf(ENTER_YOUR_MOVE);
@@ -520,7 +506,6 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	Move* new_move = NULL;
 	int ret_val;
 	while (1){
-		//printf("> ");
 		if (new_move != NULL) clear_old_moves(new_move);
 		new_move = malloc(sizeof(Move));
 		new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
@@ -655,16 +640,8 @@ int main(void)
 {
 	char board[BOARD_SIZE][BOARD_SIZE];
 	init_board(board);
-	//clear_board(board);
-	//board[1][1] = WHITE_M;
-	//board[5][1] = BLACK_M;
-	//board[7][3] = BLACK_M;
-	//minimax_depth = 3;
-	//get_all_moves(board, BLACK);
-	//printf("init board score %d\n", calc_score(board, BLACK));
 	printf(WELCOME_TO_DRAUGHTS);
 	printf(ENTER_SETTINGS);
-	//printf("> ");
 	char *command = input2str(stdin);
 	int win_pos = 0;
 
@@ -680,7 +657,6 @@ int main(void)
 		}
 		exc(command,board);
 		free(command);
-		//printf("> ");
 		command = input2str(stdin);
 	}
 	
