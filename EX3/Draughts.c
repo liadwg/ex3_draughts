@@ -254,6 +254,8 @@ void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 	if (dest_len == 0) dest_len = 1;
 	for (int i = 0; i < dest_len ; i++){
 		board[move->dest[i].col][move->dest[i].row] = board[current_col][current_row];
+		if (board[current_col][current_row] == BLACK_M && move->dest[i].row == 0) board[move->dest[i].col][move->dest[i].row] = BLACK_K;
+		if (board[current_col][current_row] == WHITE_M && move->dest[i].row == BOARD_SIZE - 1) board[move->dest[i].col][move->dest[i].row] = WHITE_K;
 		board[current_col][current_row] = EMPTY;
 		if (move->captures > 0){
 			board[(current_col + move->dest[i].col) / 2][(current_row + move->dest[i].row) / 2] = EMPTY; //check int derive
