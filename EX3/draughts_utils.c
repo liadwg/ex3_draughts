@@ -101,6 +101,16 @@ Pos get_next_diag(Pos from, Pos to){
 	return res;
 }
 
+Pos get_prev_diag(Pos from, Pos to){
+	Pos res;
+	if (from.col - to.col > 0) res.col = to.col + 1;
+	else res.col = to.col - 1;
+	if (from.row - to.row > 0) res.row = to.row + 1;
+	else res.row = to.row - 1;
+	return res;
+}
+
+
 int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int count, Pos* dests){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	int found_now = 0, found_ahead;
@@ -156,7 +166,7 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 	Move* res = NULL;
 	Move* res_head = res;
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
-	Pos curr;
+	Pos curr, new_piece;
 	int found_ahead;
 
 	for (int p = 0; p < 4; p++){
@@ -169,7 +179,7 @@ void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece)
 			char tmp = board[curr.col][curr.row];
 			board[curr.col][curr.row] = EMPTY;
 			board[piece.col][piece.row] = EMPTY;
-			Pos new_piece = get_next_diag(piece, curr);
+			new_piece = get_next_diag(piece, curr);
 			if (is_valid_pos(new_piece) && board[new_piece.col][new_piece.row] == EMPTY){
 				found_ahead = get_capture_moves(piece, new_piece, board, player, 1, &new_piece);
 				if (found_ahead == 0) add_move(piece, &new_piece, 1);
@@ -199,7 +209,7 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 void print_move(Move* head){
 	printf("<%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
 	for (int i = 1; i < head->captures; i++){
-		printf(", <%c,%d>", head->dest[i].col + 97, head->dest[i].row + 1);
+		printf("<%c,%d>", head->dest[i].col + 97, head->dest[i].row + 1);
 	}
 	printf("\n");
 }

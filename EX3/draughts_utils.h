@@ -19,6 +19,7 @@ int is_EOB(Pos piece, COLOR player);
 void clear_old_moves(Move* head);
 void add_move(Pos piece, Pos* dests, int move_captures);
 Pos get_next_diag(Pos from, Pos to);
+Pos get_prev_diag(Pos from, Pos to);
 int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int count, Pos* dests);
 void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece);
 void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece);
