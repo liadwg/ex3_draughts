@@ -553,6 +553,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			}
 		}
 	}
+	free(command);
 	clear_old_moves(new_move);
 	clear_old_moves(moves_head);
 	return ret_val;
@@ -683,8 +684,11 @@ int main(void)
 			}
 		}
 	}
-	if (win_pos == 1) command = input2str(stdin);
 	free(command);
+	if (win_pos == 1){
+		command = input2str(stdin);
+		free(command);
+	}
 	return 0;
 }
 
