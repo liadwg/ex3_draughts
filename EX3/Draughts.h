@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define WHITE_M 'm'
 #define WHITE_K 'k'
@@ -25,8 +26,8 @@ typedef char** board_t;
 #define WROND_BOARD_INITIALIZATION "Wrong board initialization\n"
 
 #define ENTER_YOUR_MOVE "Enter your move:\n" 
-#define WHITE_WIN "White player wins!" 
-#define BLACK_WIN "Black player wins!" 
+#define WHITE_WIN "White player wins!\n" 
+#define BLACK_WIN "Black player wins!\n" 
 #define perror_message(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name))
 #define print_message(message) (printf("%s", message))
 
@@ -60,9 +61,10 @@ int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color)
 Move * is_valid_move(Move * moves, Move * new_move);
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move);
 
-// safe_malloc/realloc verifies that tht memory allocation succeeded
+// safe_funcs verifies that that the original functions succeeded
 void * safe_malloc(size_t size);
 void * safe_realloc(void *old_pointer, size_t size);
+int safe_fgetc(FILE *stream);
 
 int is_valid_pos(Pos pos);
 int is_king(char piece);
