@@ -685,9 +685,9 @@ int main(void)
 	}
 	
 	if (strcmp(command, "start") == 0){
-		print_board(board);
 		while (1){
 			if (user_color == WHITE){
+				print_board(board);
 				int ret_val = user_turn(board, WHITE);
 				if (ret_val == QUIT) break;
 				if (ret_val == WIN_POS){
