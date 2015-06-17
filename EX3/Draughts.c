@@ -460,7 +460,11 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 	if (strcmp(word1, "set") == 0){
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
-		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) { printf(WRONG_POSITION); }
+		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 ||
+			atoi(coor2) > 10 || (coor1[0] - 'a' + atoi(coor2) - 1) % 2 == 1){
+			printf(WRONG_POSITION);
+			return;
+		}
 		char * a = strtok(NULL, " ");
 		if (a == NULL) return;
 		char * b = strtok(NULL, " ");
