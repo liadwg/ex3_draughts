@@ -85,7 +85,6 @@ void print_moves(Move* head);
 int get_piece_score(char piece, COLOR player);
 int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player);
 void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE][BOARD_SIZE]);
-COLOR other_player(COLOR player);
 int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta);
 
 // Globals
