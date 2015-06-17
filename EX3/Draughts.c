@@ -277,6 +277,7 @@ int main(void)
 	printf(ENTER_SETTINGS);
 	printf("> ");
 	char *command = input2str(stdin);
+	int win_pos;
 
 	while (strcmp(command, "quit") != 0 && strcmp(command, "start") != 0){
 		exc(command,board);
@@ -290,37 +291,35 @@ int main(void)
 		while (1){
 			if (user_color == WHITE){
 				int ret_val = user_turn(board, WHITE);
-				if (ret_val == QUIT){
-					command = "quit";
-					break;
-				}
+				if (ret_val == QUIT) break;
 				if (ret_val == WIN_POS){
 					printf(BLACK_WIN);
+					win_pos = 1;
 					break;
 				}
 				if (computer_turn(board, BLACK) == WIN_POS){
 					printf(WHITE_WIN);
+					win_pos = 1;
 					break;
 				}
 			}
 			else{
 				if (computer_turn(board, WHITE) == WIN_POS){
 					printf(BLACK_WIN);
+					win_pos = 1;
 					break;
 				}
 				int ret_val = user_turn(board, BLACK);
-				if (ret_val == QUIT){
-					command = "quit";
-					break;
-				}
+				if (ret_val == QUIT) break;
 				if (ret_val == WIN_POS){
 					printf(WHITE_WIN);
+					win_pos = 1;
 					break;
 				}
 			}
 		}
 	}
-	if (strcmp(command, "quit") != 0) command=input2str(stdin);
+	if (win_pos == 1) command = input2str(stdin);
 	free(command);
 	return 0;
 }
