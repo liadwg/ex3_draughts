@@ -250,20 +250,23 @@ Move * is_valid_move(Move * moves, Move * new_move){
 }
 
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
-	int current_col = move->piece.col;
-	int current_row = move->piece.row;
+	Pos cur, cap;
+	cur.col = move->piece.col;
+	cur.row = move->piece.row;
 	int dest_len = move->captures;
 	if (dest_len == 0) dest_len = 1;
 	for (int i = 0; i < dest_len ; i++){
-		board[move->dest[i].col][move->dest[i].row] = board[current_col][current_row];
-		if (board[current_col][current_row] == BLACK_M && move->dest[i].row == 0) board[move->dest[i].col][move->dest[i].row] = BLACK_K;
-		if (board[current_col][current_row] == WHITE_M && move->dest[i].row == BOARD_SIZE - 1) board[move->dest[i].col][move->dest[i].row] = WHITE_K;
-		board[current_col][current_row] = EMPTY;
+		board[move->dest[i].col][move->dest[i].row] = board[cur.col][cur.row];
+		if (board[cur.col][cur.row] == BLACK_M && move->dest[i].row == 0) board[move->dest[i].col][move->dest[i].row] = BLACK_K;
+		if (board[cur.col][cur.row] == WHITE_M && move->dest[i].row == BOARD_SIZE - 1) board[move->dest[i].col][move->dest[i].row] = WHITE_K;
+		board[cur.col][cur.row] = EMPTY;
 		if (move->captures > 0){
-			board[(current_col + move->dest[i].col) / 2][(current_row + move->dest[i].row) / 2] = EMPTY; //check int derive
+			cap = get_prev_diag(cur, move->dest[i]);
+			board[cap.col][cap.row] = EMPTY;
+			//board[(current_col + move->dest[i].col) / 2][(current_row + move->dest[i].row) / 2] = EMPTY; //check int derive
 		}
-		current_col = move->dest[i].col;
-		current_row = move->dest[i].row;
+		cur.col = move->dest[i].col;
+		cur.row = move->dest[i].row;
 	}
 }
 
@@ -287,7 +290,10 @@ int main(void)
 		while (1){
 			if (user_color == WHITE){
 				int ret_val = user_turn(board, WHITE);
-				if (ret_val == QUIT) break;
+				if (ret_val == QUIT){
+					command = "quit";
+					break;
+				}
 				if (ret_val == WIN_POS){
 					printf(BLACK_WIN);
 					break;
@@ -303,7 +309,10 @@ int main(void)
 					break;
 				}
 				int ret_val = user_turn(board, BLACK);
-				if (ret_val == QUIT) break;
+				if (ret_val == QUIT){
+					command = "quit";
+					break;
+				}
 				if (ret_val == WIN_POS){
 					printf(WHITE_WIN);
 					break;
@@ -311,6 +320,7 @@ int main(void)
 			}
 		}
 	}
+	if (strcmp(command, "quit") != 0) command=input2str(stdin);
 	free(command);
 	return 0;
 }
