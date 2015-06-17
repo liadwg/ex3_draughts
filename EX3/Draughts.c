@@ -35,6 +35,7 @@ int safe_fgetc(FILE *stream){
 	if (printf(__VA_ARGS__) < 0) {perror_message("printf"); abort();} \
 		else (void)0
 
+
 // Globals
 Move* moves = NULL;
 Move* moves_head = NULL;
@@ -44,6 +45,8 @@ Move* best_move;
 COLOR user_color = WHITE;
 int minimax_depth = 1;
 
+
+// Helper funcs
 int is_valid_pos(Pos pos){
 	return (pos.col >= 0 && pos.col < BOARD_SIZE && pos.row >= 0 && pos.row < BOARD_SIZE);
 }
@@ -58,11 +61,13 @@ int is_opposite(COLOR player, char piece){
 	return 0;
 }
 
+// Helper func - checks if a piece reached the end of the board according to its color
 int is_EOB(Pos piece, COLOR player){
 	if (player == WHITE) return piece.row == BOARD_SIZE - 1;
 	else return piece.row == 0;
 }
 
+// frees moves linked list
 void clear_old_moves(Move* head){
 	if (head != NULL){
 		clear_old_moves(head->next);
@@ -71,6 +76,7 @@ void clear_old_moves(Move* head){
 	}
 }
 
+// adds a move to the list, while making sure it contains valid moves only
 void add_move(Pos piece, Pos* dests, int move_captures){
 	if (moves == NULL){
 		moves = malloc(sizeof(Move));
@@ -106,6 +112,7 @@ void add_move(Pos piece, Pos* dests, int move_captures){
 	moves->next = NULL;
 }
 
+// Helper funcs - return the next/prev pos in a diagonal
 Pos get_next_diag(Pos from, Pos to){
 	Pos res;
 	if (from.col - to.col > 0) res.col = to.col - 1;
@@ -124,7 +131,7 @@ Pos get_prev_diag(Pos from, Pos to){
 	return res;
 }
 
-
+// finds moves with chained captures
 int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int count, Pos* dests){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	int found_now = 0, found_ahead;
@@ -153,6 +160,7 @@ int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], 
 	return found_now;
 }
 
+// finds all moves of a single man piece
 void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	int direction = 1, found_ahead;
@@ -175,7 +183,7 @@ void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	}
 }
 
-
+// finds all moves of a single king piece
 void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	Pos curr, new_piece;
@@ -218,6 +226,7 @@ Move * get_all_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	return moves_head;
 }
 
+// prints a single move in a specific format
 void print_move(Move* head){
 	printf("<%c,%d> to <%c,%d>", head->piece.col + 97, head->piece.row + 1, head->dest[0].col + 97, head->dest[0].row + 1);
 	for (int i = 1; i < head->captures; i++){
@@ -233,6 +242,7 @@ void print_moves(Move* head){
 	}
 }
 
+// calc_score helper func
 int get_piece_score(char piece, COLOR player){
 	if (player == WHITE) switch (piece){
 	case BLACK_M: return -1;
@@ -249,6 +259,7 @@ int get_piece_score(char piece, COLOR player){
 	return 0;
 }
 
+// calculates the score of the board from a player's prospective
 int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	int score = 0, opposites = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -260,16 +271,13 @@ int calc_score(char board[BOARD_SIZE][BOARD_SIZE], COLOR player){
 	return score;
 }
 
+// Helper func
 void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE][BOARD_SIZE]){
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++) board2[i][j] = board1[i][j];
 }
 
-COLOR other_player(COLOR player){
-	if (player == WHITE) return BLACK;
-	return WHITE;
-}
-
+// minimax recursive func, using alpha-beta prunning
 int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta){
 	Move* move_list = get_all_moves(board, player);
 	Move* curr_move = move_list;
@@ -392,6 +400,7 @@ void init_board(char board[BOARD_SIZE][BOARD_SIZE]){
 	}
 }
 
+// clears the board from all pieces
 void clear_board(char board[BOARD_SIZE][BOARD_SIZE]){
 	int i, j;
 	for (i = 0; i < BOARD_SIZE; i++){
@@ -401,6 +410,7 @@ void clear_board(char board[BOARD_SIZE][BOARD_SIZE]){
 	}
 }
 
+// handles user input (unknown length), returns a string without redundent white spaces after each new line
 char* input2str(FILE* pFile)
 {
 	char *str;
@@ -432,6 +442,7 @@ char* input2str(FILE* pFile)
 	return str;
 }
 
+// settings state input loop - gets the user's command and handles it
 void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 	char * word1;
 	word1 = strtok(str, " ");
@@ -472,6 +483,7 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 	return;
 }
 
+// manages the computer's turn
 int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	curr_player = color;
 	//print_board(board);
@@ -494,6 +506,8 @@ int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 	return ret_val;
 }
 
+
+// manages the users turn, game state user input loop
 int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	//clear_old_moves(moves_head);
 	get_all_moves(board, color);
@@ -567,12 +581,12 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			}
 		}
 	}
-	free(command);
 	clear_old_moves(new_move);
 	clear_old_moves(moves_head);
 	return ret_val;
 }
 
+// Helper func - checks if a piece belongs to the player
 int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color){
 	if (color == BLACK){
 		if (board[move->piece.col][move->piece.row] == BLACK_M || board[move->piece.col][move->piece.row] == BLACK_K) return 1;
@@ -583,6 +597,7 @@ int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color)
 	return 0;
 }
 
+// checks if a move is in the valid moves list
 Move * is_valid_move(Move * moves, Move * new_move){
 	Move * current_move = moves;
 	while (current_move != NULL){
@@ -599,6 +614,7 @@ Move * is_valid_move(Move * moves, Move * new_move){
 	return NULL;
 }
 
+// excutes a specific move on the given board
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 	Pos cur, cap;
 	cur.col = move->piece.col;
@@ -619,6 +635,7 @@ void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 	}
 }
 
+// safety check before starting the game
 int is_valid_board(char board[BOARD_SIZE][BOARD_SIZE]){
 	int b_num = 0;
 	int w_num =0;
@@ -703,7 +720,6 @@ int main(void)
 	if (win_pos == 1){
 		command = input2str(stdin);
 		free(command);
-	}
 	return 0;
 }
 
