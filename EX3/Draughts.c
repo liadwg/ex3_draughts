@@ -134,7 +134,7 @@ Pos get_prev_diag(Pos from, Pos to){
 // finds moves with chained captures
 int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int count, Pos* dests){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
-	int found_now = 0, found_ahead;
+	int found_now = 0, found_ahead = -1;
 	for (int p = 0; p < 4; p++)
 		if (is_valid_pos(pos[p]) && is_opposite(player, board[pos[p].col][pos[p].row])){
 		Pos new_piece = get_next_diag(piece, pos[p]);
@@ -163,7 +163,7 @@ int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], 
 // finds all moves of a single man piece
 void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
-	int direction = 1, found_ahead;
+	int direction = 1, found_ahead = -1;
 	if (player == BLACK) direction = -1;
 
 	for (int p = 0; p < 4; p++){
@@ -187,7 +187,7 @@ void get_man_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 void get_king_moves(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, Pos piece){
 	Pos pos[4] = { { piece.col - 1, piece.row - 1 }, { piece.col + 1, piece.row - 1 }, { piece.col - 1, piece.row + 1 }, { piece.col + 1, piece.row + 1 } };
 	Pos curr, new_piece;
-	int found_ahead;
+	int found_ahead = -1;
 
 	for (int p = 0; p < 4; p++){
 		curr = pos[p];
@@ -289,7 +289,10 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	}
 	if (curr_move == NULL && player != curr_player) return 100;
 	if (curr_move == NULL && player == curr_player) return -100;
-	if (depth == minimax_depth || curr_move == NULL) return calc_score(board, curr_player);
+	if (depth == minimax_depth || curr_move == NULL){
+		clear_old_moves(move_list);
+		return calc_score(board, curr_player);
+	}
 
 	if (depth == 0){
 		best_move = curr_move;
@@ -459,14 +462,14 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 	if (strcmp(word1, "rm") == 0){
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
-		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) printf(WRONG_POSITION);
+		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) { printf(WRONG_POSITION); }
 		else board[coor1[0] - 'a'][atoi(coor2) - 1] = EMPTY;
 	}
 	if (strcmp(word1, "set") == 0){
 		//char * coor = strtok(NULL, " <>");
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
-		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) printf(WRONG_POSITION);
+		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) { printf(WRONG_POSITION); }
 		char * a = strtok(NULL, " ");
 		if (a == NULL) return;
 		char * b = strtok(NULL, " ");
@@ -715,12 +718,8 @@ int main(void)
 			}
 		}
 	}
+	if (win_pos == 1) command = input2str(stdin);
 	free(command);
-	clear_old_moves(moves_head);
-	if (win_pos == 1){
-		command = input2str(stdin);
-		free(command);
-	return 0;
 }
 
 
