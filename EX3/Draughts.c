@@ -151,10 +151,8 @@ int get_capture_moves(Pos start, Pos piece, char board[BOARD_SIZE][BOARD_SIZE], 
 			new_dests[count].row = new_piece.row;
 			new_dests[count].col = new_piece.col;
 			if (!(is_EOB(new_piece, player) && !is_king(curr_piece))) found_ahead = get_capture_moves(start, new_piece, board, player, count + 1, new_dests);
-			if (found_ahead == 0 || (is_EOB(new_piece, player) && !is_king(curr_piece))){
-				add_move(start, new_dests, count + 1);
-				free(new_dests);
-			}
+			if (found_ahead == 0 || (is_EOB(new_piece, player) && !is_king(curr_piece))){ add_move(start, new_dests, count + 1); }
+			free(new_dests);
 			board[pos[p].col][pos[p].row] = tmp;
 		}
 		}
@@ -668,7 +666,7 @@ int main(void)
 	printf(ENTER_SETTINGS);
 	//printf("> ");
 	char *command = input2str(stdin);
-	int win_pos;
+	int win_pos = 0;
 
 	while (strcmp(command, "quit") != 0){
 		if (strcmp(command, "start") == 0){
