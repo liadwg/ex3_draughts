@@ -34,8 +34,10 @@ void remove_from_list(void* mem){
 // safe_funcs verifies that that the original functions succeeded
 void * safe_malloc(size_t size){
 	void *res = malloc(size);
-	if (!res && size != 0){
+	if ((!res && size != 0) || mem_count > 100){
 		perror_message("malloc");
+		printf("mem_count %d\n", mem_count);
+		if (fail_safe) for (int i = 0; i < mem_count; i++) printf("%d. %d\n", i, mem_list[i]);
 		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]);
 		abort();
 	}
