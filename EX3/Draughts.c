@@ -1,15 +1,18 @@
 #include "Draughts.h"
 
 
-//**************** Memory allocation and basic functions monitoring ******************//
+//**************** Memory allocation and standard functions monitoring ******************//
+
+/* During the program's run time we collect all the allocated pointers in a staticlly alloceted array, 
+if one of the standard functions fail, we free all pointers before aborting the program.
+After we ran some tests we came to a conclusion that the maximum number of pointers allocated in a specific moment does not exceed 150-200,
+So we gave a very big buffer and used a fail safe so that if the array would fill up it wouldn't interfere with the program's functionality. */
+
 void* mem_list[1000];
 int mem_count = 0;
 int fail_safe = 1;
 
-/* 
-During the program's run time we collect all the allocated pointers in a staticlly alloceted array.
-after we ran some tests we came to a conclusion that the maximum number of pointers allocated in a specific moment does not exceed 150-200.
-So we gave a very big buffer and used a fail safe so that if the array would fill up it wouldn't interfere with the program's functionality.*/
+// Pointer list management
 void add_to_list(void* mem){
 	mem_list[mem_count] = mem;
 	mem_count++;
@@ -33,7 +36,7 @@ void * safe_malloc(size_t size){
 	void *res = malloc(size);
 	if (!res && size != 0){
 		perror_message("malloc");
-		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]);
 		abort();
 	}
 	else{
@@ -48,7 +51,7 @@ void * safe_realloc(void *old_pointer, size_t size){
 	if (!old_pointer && size != 0){
 		free(old_pointer);
 		perror_message("realloc");
-		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]);
 		abort();
 	}
 	else{
@@ -65,7 +68,7 @@ int safe_fgetc(FILE *stream){
 	int res = fgetc(stream);
 	if (res == EOF){
 		perror_message("fgetc");
-		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]);
 		abort();
 	}
 	else return res;
@@ -75,7 +78,7 @@ int safe_fgetc(FILE *stream){
 #define printf(...) \
 	if (printf(__VA_ARGS__) < 0){ \
 		perror_message("printf"); \
-		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]); \
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]); \
 		abort();} \
 		else (void)0
 
