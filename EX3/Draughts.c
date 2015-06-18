@@ -1,13 +1,45 @@
 #include "Draughts.h"
 
+
+//**************** Memory allocation and basic functions monitoring ******************//
+void* mem_list[1000];
+int mem_count = 0;
+int fail_safe = 1;
+
+/* 
+During the program's run time we collect all the allocated pointers in a staticlly alloceted array.
+after we ran some tests we came to a conclusion that the maximum number of pointers allocated in a specific moment does not exceed 150-200.
+So we gave a very big buffer and used a fail safe so that if the array would fill up it wouldn't interfere with the program's functionality.*/
+void add_to_list(void* mem){
+	mem_list[mem_count] = mem;
+	mem_count++;
+	if (mem_count > 950) {
+		printf("WARNING - Memory allocation close to bounds, turning off pointer monitoring.");
+		fail_safe = 0;
+	}
+}
+
+void remove_from_list(void* mem){
+	for (int i = 0; i < mem_count; i++)
+		if (mem_list[i] == mem) {
+		mem_count--;
+		mem_list[i] = mem_list[mem_count];
+		break;
+		}
+}
+
 // safe_funcs verifies that that the original functions succeeded
 void * safe_malloc(size_t size){
 	void *res = malloc(size);
 	if (!res && size != 0){
 		perror_message("malloc");
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
 		abort();
 	}
-	else return res;
+	else{
+		if (fail_safe) add_to_list(res);
+		return res;
+	}
 }
 #define malloc(x) safe_malloc(x)
 
@@ -16,9 +48,16 @@ void * safe_realloc(void *old_pointer, size_t size){
 	if (!old_pointer && size != 0){
 		free(old_pointer);
 		perror_message("realloc");
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
 		abort();
 	}
-	else return res;
+	else{
+		if (fail_safe){
+			remove_from_list(old_pointer);
+			add_to_list(res);
+		}
+		return res;
+	}
 }
 #define realloc(x, y) safe_realloc((x), (y))
 
@@ -26,6 +65,7 @@ int safe_fgetc(FILE *stream){
 	int res = fgetc(stream);
 	if (res == EOF){
 		perror_message("fgetc");
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]);
 		abort();
 	}
 	else return res;
@@ -33,9 +73,19 @@ int safe_fgetc(FILE *stream){
 #define fgetc(x) safe_fgetc(x)
 
 #define printf(...) \
-	if (printf(__VA_ARGS__) < 0) {perror_message("printf"); abort();} \
+	if (printf(__VA_ARGS__) < 0){ \
+		perror_message("printf"); \
+		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[mem_count]); \
+		abort();} \
 		else (void)0
 
+void safe_free(void * mem){
+	if (fail_safe) remove_from_list(mem);
+	free(mem);
+}
+#define free(x) safe_free(x)
+
+//********************************* Draughts code ************************************//
 
 // Globals
 Move* moves = NULL;
@@ -302,6 +352,8 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	// MAX
 	if (depth % 2 == 0){
 		while (curr_move != NULL){
+			if (mem_count > 120) printf("************** minimax mem count %d\n", mem_count);
+
 			exc_move(board, curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
 			if (tmp > alpha){
@@ -324,6 +376,8 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	// MIN
 	else{
 		while (curr_move != NULL){
+			if (mem_count > 120) printf("************** minimax mem count %d\n", mem_count);
+
 			exc_move(board, curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
 			if (tmp < beta){
@@ -651,8 +705,10 @@ int main(void)
 	printf(ENTER_SETTINGS);
 	char *command = input2str(stdin);
 	int win_pos = 0;
+	minimax_depth = 6; // REMOVE
 
 	while (strcmp(command, "quit") != 0){
+		printf("************** main mem count %d\n", mem_count);
 		if (strcmp(command, "start") == 0){
 			if (is_valid_board(board)) break;
 			else{
@@ -669,6 +725,7 @@ int main(void)
 	
 	if (strcmp(command, "start") == 0){
 		while (1){
+			printf("************** main mem count %d\n", mem_count);
 			if (user_color == WHITE){
 				//print_board(board);
 				int ret_val = user_turn(board, WHITE);
