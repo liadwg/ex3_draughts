@@ -3,7 +3,7 @@
 
 //**************** Memory allocation and standard functions monitoring ******************//
 
-/* During the program's run time we collect all the allocated pointers in a staticlly alloceted array, 
+/* During the program's run time we collect all the allocated pointers in a statically allocated array, 
 if one of the standard functions fail, we free all pointers before aborting the program.
 After we ran some tests we came to a conclusion that the maximum number of pointers allocated in a specific moment does not exceed 150-200,
 So we gave a very big buffer and used a fail safe so that if the array would fill up it wouldn't interfere with the program's functionality. */
@@ -329,7 +329,7 @@ void duplicate_board(char board1[BOARD_SIZE][BOARD_SIZE], char board2[BOARD_SIZE
 		for (int j = 0; j < BOARD_SIZE; j++) board2[i][j] = board1[i][j];
 }
 
-// minimax recursive func, using alpha-beta prunning
+// minimax recursive func, using alpha-beta pruning
 int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int depth, int alpha, int beta){
 	Move* move_list = get_all_moves(board, player);
 	Move* curr_move = move_list;
@@ -459,7 +459,7 @@ void clear_board(char board[BOARD_SIZE][BOARD_SIZE]){
 	}
 }
 
-// handles user input (unknown length), returns a string without redundent white spaces after each new line
+// handles user input (unknown length), returns a string without redundant white spaces after each new line
 char* input2str(FILE* pFile){
 	char *str;
 	char ch, pch;
@@ -661,7 +661,7 @@ Move * is_valid_move(Move * moves, Move * new_move){
 	return NULL;
 }
 
-// excutes a specific move on the given board
+// executes a specific move on the given board
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move){
 	Pos cur, cap;
 	cur.col = move->piece.col;
@@ -721,9 +721,10 @@ int main(void)
 	}
 	
 	if (strcmp(command, "start") == 0){
+		// initially we printed the board at the start of the game, commented out in order to match the running examples.
+		//if (user_color == WHITE) print_board(board);
 		while (1){
 			if (user_color == WHITE){
-				//print_board(board);
 				int ret_val = user_turn(board, WHITE);
 				if (ret_val == QUIT) break;
 				if (ret_val == WIN_POS){
