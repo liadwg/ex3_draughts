@@ -49,7 +49,7 @@ int minimax_depth = 1;
 
 // Helper funcs
 int is_valid_pos(Pos pos){
-	return (pos.col >= 0 && pos.col < BOARD_SIZE && pos.row >= 0 && pos.row < BOARD_SIZE);
+	return (pos.col >= 0 && pos.col < BOARD_SIZE && pos.row >= 0 && pos.row < BOARD_SIZE && ((pos.col + pos.row) % 2 != 1));
 }
 
 int is_king(char piece){
@@ -446,18 +446,18 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 		if (x > 6 || x < 1) printf(WRONG_MINIMAX_DEPTH);
 		else minimax_depth = x;
 	}
-	if (strcmp(word1, "user_color") == 0){
+	else if (strcmp(word1, "user_color") == 0){
 		char * color = strtok(NULL, " ");
 		if (strcmp(color, "black") == 0) user_color = BLACK;
 	}
-	if (strcmp(word1, "clear") == 0) clear_board(board);
-	if (strcmp(word1, "rm") == 0){
+	else if (strcmp(word1, "clear") == 0) clear_board(board);
+	else if (strcmp(word1, "rm") == 0){
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
 		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 || atoi(coor2) > 10) { printf(WRONG_POSITION); }
 		else board[coor1[0] - 'a'][atoi(coor2) - 1] = EMPTY;
 	}
-	if (strcmp(word1, "set") == 0){
+	else if (strcmp(word1, "set") == 0){
 		char * coor1 = strtok(NULL, " <,>");
 		char * coor2 = strtok(NULL, " <,>");
 		if (coor1[0] < 'a' || coor1[0] > 'j' || atoi(coor2) < 1 ||
@@ -477,7 +477,8 @@ void exc(char* str, char board[BOARD_SIZE][BOARD_SIZE]){
 			else  board[coor1[0] - 'a'][atoi(coor2) - 1] = WHITE_K;
 		}
 	}
-	if (strcmp(word1, "print") == 0) print_board(board);
+	else if (strcmp(word1, "print") == 0) print_board(board);
+	else printf(ILLEGAL_COMMAND);
 	return;
 }
 
@@ -504,12 +505,12 @@ int computer_turn(char board[BOARD_SIZE][BOARD_SIZE],COLOR color){
 int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 	get_all_moves(board, color);
 	if (moves_head == NULL) return WIN_POS;
-	printf(ENTER_YOUR_MOVE);
 	char *word1;
 	char *command = NULL;
 	Move* new_move = NULL;
 	int ret_val;
 	while (1){
+		printf(ENTER_YOUR_MOVE);
 		if (new_move != NULL) clear_old_moves(new_move);
 		new_move = malloc(sizeof(Move));
 		new_move->dest = malloc(sizeof(Pos) * 2 * BOARD_SIZE);
@@ -521,11 +522,11 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 			ret_val = QUIT;
 			break;
 		}
-		if (strcmp(word1, "get_moves") == 0){
+		else if (strcmp(word1, "get_moves") == 0){
 			print_moves(moves_head);
 			continue;
 		}
-		if (strcmp(word1, "move") == 0){
+		else if (strcmp(word1, "move") == 0){
 			char * piece_coor1 = strtok(NULL, " <,>");
 			char * piece_coor2 = strtok(NULL, " <,>");
 			new_move->piece.col = piece_coor1[0] - 'a';
@@ -570,6 +571,7 @@ int user_turn(char board[BOARD_SIZE][BOARD_SIZE], COLOR color){
 				break;
 			}
 		}
+		else printf(ILLEGAL_COMMAND);
 	}
 	free(command);
 	clear_old_moves(new_move);
