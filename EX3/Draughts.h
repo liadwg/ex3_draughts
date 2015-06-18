@@ -61,11 +61,15 @@ int is_valid_piece(char board[BOARD_SIZE][BOARD_SIZE], Move * move, COLOR color)
 Move * is_valid_move(Move * moves, Move * new_move);
 void exc_move(char board[BOARD_SIZE][BOARD_SIZE], Move * move);
 
-// safe_funcs verifies that that the original functions succeeded
+// Memory allocation and standard functions monitoring
+void add_to_list(void* mem);
+void remove_from_list(void* mem);
 void * safe_malloc(size_t size);
 void * safe_realloc(void *old_pointer, size_t size);
 int safe_fgetc(FILE *stream);
+void safe_free(void * mem);
 
+// Draughts code
 int is_valid_pos(Pos pos);
 int is_king(char piece);
 int is_opposite(COLOR player, char piece);
