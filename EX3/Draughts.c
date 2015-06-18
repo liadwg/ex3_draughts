@@ -34,10 +34,8 @@ void remove_from_list(void* mem){
 // safe_funcs verifies that that the original functions succeeded
 void * safe_malloc(size_t size){
 	void *res = malloc(size);
-	if ((!res && size != 0) || mem_count > 100){
+	if (!res && size != 0){
 		perror_message("malloc");
-		printf("mem_count %d\n", mem_count);
-		if (fail_safe) for (int i = 0; i < mem_count; i++) printf("%d. %d\n", i, mem_list[i]);
 		if (fail_safe) for (int i = 0; i < mem_count; i++) free(mem_list[i]);
 		abort();
 	}
@@ -357,8 +355,6 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	// MAX
 	if (depth % 2 == 0){
 		while (curr_move != NULL){
-			if (mem_count > 120) printf("************** minimax mem count %d\n", mem_count);
-
 			exc_move(board, curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
 			if (tmp > alpha){
@@ -381,8 +377,6 @@ int alpha_beta_minimax(char board[BOARD_SIZE][BOARD_SIZE], COLOR player, int dep
 	// MIN
 	else{
 		while (curr_move != NULL){
-			if (mem_count > 120) printf("************** minimax mem count %d\n", mem_count);
-
 			exc_move(board, curr_move);
 			tmp = alpha_beta_minimax(board, (player == 0), depth + 1, alpha, beta);
 			if (tmp < beta){
@@ -710,10 +704,8 @@ int main(void)
 	printf(ENTER_SETTINGS);
 	char *command = input2str(stdin);
 	int win_pos = 0;
-	minimax_depth = 6; // REMOVE
 
 	while (strcmp(command, "quit") != 0){
-		printf("************** main mem count %d\n", mem_count);
 		if (strcmp(command, "start") == 0){
 			if (is_valid_board(board)) break;
 			else{
@@ -730,7 +722,6 @@ int main(void)
 	
 	if (strcmp(command, "start") == 0){
 		while (1){
-			printf("************** main mem count %d\n", mem_count);
 			if (user_color == WHITE){
 				//print_board(board);
 				int ret_val = user_turn(board, WHITE);
